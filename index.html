@@ -1,0 +1,1143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Activation steering: a beginner’s concept map</title>
+<meta name="description" content="An interactive map of the key concepts in activation steering, each linked to the papers that introduce it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --bg:#EDF0EC;--surface:#FAFBF9;--raised:#FFFFFF;--ink:#172029;--muted:#56606A;
+  --rule:#D2D8D0;--grid:#C7CEC4;--focus:#1F5FD6;
+  --serif:"Newsreader",Georgia,"Times New Roman",serif;
+  --sans:"Figtree",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#10151A;--surface:#161C22;--raised:#1D242C;--ink:#E3E7EB;--muted:#9AA4AE;--rule:#2A333C;--grid:#303A44;--focus:#8DB6FF}
+}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;display:flex;flex-direction:column;height:100vh}
+button{font:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+.masthead{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 32px;padding:24px 28px 30px}
+.masthead h1{font-family:var(--serif);font-weight:500;font-size:clamp(27px,3vw,38px);line-height:1.08;margin:0;letter-spacing:-0.01em}
+.lede{margin:8px 0 0;color:var(--muted);max-width:62ch}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.search{position:relative}
+.search input{font:inherit;color:var(--ink);background:var(--raised);border:1px solid var(--rule);border-radius:8px;padding:8px 12px;width:270px}
+.search input::placeholder{color:var(--muted)}
+.status{position:absolute;left:2px;top:100%;margin-top:4px;font-size:13px;color:var(--muted);white-space:nowrap}
+.btn{color:var(--ink);background:var(--raised);border:1px solid var(--rule);border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:500}
+.btn:hover{border-color:var(--muted)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.primary{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.layout{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:16px;padding:0 28px 12px;min-height:0}
+.map-wrap{position:relative;background:var(--surface);border:1px solid var(--rule);border-radius:14px;overflow:hidden;min-height:520px}
+#map{display:block;width:100%;height:100%;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+#map.dragging{cursor:grabbing}
+.map-hint{position:absolute;left:14px;bottom:12px;margin:0;font-size:13px;color:var(--muted);pointer-events:none}
+.zoom{position:absolute;right:12px;bottom:12px;display:flex;gap:6px}
+.zoom .btn{width:36px;height:36px;padding:0;font-size:18px;line-height:1}
+
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:14px;overflow:auto;min-height:0}
+.tabs{display:flex;gap:4px;padding:8px 14px 0;border-bottom:1px solid var(--rule);position:sticky;top:0;background:var(--surface);z-index:2}
+.tab{background:none;border:0;border-bottom:2px solid transparent;padding:9px 10px 10px;color:var(--muted);cursor:pointer;font-weight:500}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.pane{padding:22px 26px 30px}
+.pane h2{font-family:var(--serif);font-weight:500;font-size:29px;line-height:1.14;margin:6px 0 12px;letter-spacing:-0.005em}
+.pane h2.paper-title{font-size:24px}
+.def{font-family:var(--serif);font-size:18.5px;line-height:1.62;margin:0 0 6px}
+.pane h3{font-size:14px;font-weight:600;margin:24px 0 8px}
+.pane p{margin:0 0 12px}
+.muted{color:var(--muted)}
+.small{font-size:13.5px}
+
+.tint{--k:var(--c)}
+@media (prefers-color-scheme:dark){.tint{--k:var(--cd)}}
+.branch-tag{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--k);background:none;border:0;padding:0;cursor:pointer}
+.branch-tag.static{cursor:default}
+.branch-tag:not(.static):hover{text-decoration:underline;text-underline-offset:3px}
+.swatch{width:10px;height:10px;border-radius:50%;background:var(--k);flex:none}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips.stack{flex-direction:column;align-items:flex-start}
+.chip{font-size:14px;display:inline-flex;align-items:center;gap:8px;background:var(--raised);color:var(--ink);border:1px solid var(--rule);border-radius:999px;padding:4px 12px 4px 10px;cursor:pointer;text-align:left}
+.chip:hover{border-color:var(--k)}
+
+.papers{list-style:none;margin:0;padding:0}
+.papers li{padding:11px 0;border-top:1px solid var(--rule)}
+.papers li:first-child{border-top:0;padding-top:2px}
+.paper-link{font-family:var(--serif);font-size:16.5px;line-height:1.35;color:var(--ink);text-decoration:underline;text-decoration-color:var(--rule);text-underline-offset:3px}
+.paper-link:hover{text-decoration-color:var(--ink)}
+.meta{display:block;font-size:13px;color:var(--muted);margin-top:3px}
+.flag{display:inline-block;font-size:12px;border:1px solid var(--rule);border-radius:4px;padding:0 5px;margin-left:6px;color:var(--muted);vertical-align:1px}
+.inline-btn{background:none;border:0;padding:0;color:var(--muted);text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-size:13px}
+
+.stepper{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;background:var(--raised);border:1px solid var(--rule);border-radius:10px;padding:8px 10px 8px 14px;margin-bottom:18px;font-size:14px}
+.stepper .btns{display:flex;gap:6px}
+.stepper .btn{padding:5px 10px;font-size:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:26px;align-items:center}
+
+.branch-list{list-style:none;margin:0;padding:0}
+.branch-list li{border-top:1px solid var(--rule)}
+.branch-list button{display:block;width:100%;text-align:left;background:none;border:0;padding:12px 2px;cursor:pointer;color:var(--ink)}
+.branch-list .name{display:flex;align-items:center;gap:9px;font-weight:600;color:var(--k)}
+.branch-list .blurb{display:block;color:var(--muted);font-size:14px;margin:2px 0 0 19px}
+
+.group-title{font-family:var(--serif);font-size:20px;font-weight:500;margin:26px 0 2px}
+.group-title:first-child{margin-top:4px}
+.paper-row{border-top:1px solid var(--rule)}
+.paper-row:first-of-type{border-top:0}
+.paper-btn{display:block;width:100%;text-align:left;background:none;border:0;cursor:pointer;padding:10px 0;color:var(--ink)}
+.paper-btn .t{display:block;font-family:var(--serif);font-size:16px;line-height:1.35}
+.paper-btn:hover .t{text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--rule)}
+.copy-fallback{width:100%;font:inherit;font-size:13px;margin-top:8px;padding:6px 8px;border:1px solid var(--rule);border-radius:6px;background:var(--raised);color:var(--ink)}
+
+footer{padding:2px 28px 18px;font-size:13px;color:var(--muted)}
+footer p{margin:0;max-width:95ch}
+
+.node{cursor:pointer}
+.node text{font-family:var(--sans);fill:var(--ink);pointer-events:none}
+.node .pill{fill:var(--raised);stroke:var(--k);stroke-width:1.2}
+.node.child text{font-size:13.5px;font-weight:500}
+.node.hub .pill{fill:var(--k);stroke:var(--k)}
+.node.hub text{fill:#FFFFFF;font-size:15px;font-weight:600}
+@media (prefers-color-scheme:dark){.node.hub text{fill:#0F1418}}
+.node.center circle{fill:var(--ink);stroke:var(--ink)}
+.node.center text{fill:var(--surface);font-family:var(--serif);font-size:22px}
+.node.is-selected .pill{stroke-width:2.6}
+.node.child.is-selected .pill{fill:color-mix(in srgb,var(--k) 16%,var(--raised))}
+.node.hub.is-selected .pill{stroke:var(--ink);stroke-width:2.4}
+.node.center.is-selected circle{stroke:var(--focus);stroke-width:3}
+.node:focus{outline:none}
+.node:focus-visible .pill,.node:focus-visible circle{stroke:var(--focus);stroke-width:3}
+.edge{fill:none;stroke:var(--k);stroke-width:1.6;opacity:.5}
+.rel{fill:none;stroke:var(--ink);stroke-width:1.3;stroke-dasharray:4 5;opacity:.5;pointer-events:none}
+.badge circle{fill:var(--ink)}
+.badge text{fill:var(--surface);font-size:11.5px;font-weight:600;font-family:var(--sans)}
+.axis{stroke:var(--grid);stroke-width:1}
+.grid-dot{fill:var(--grid)}
+.node,.edge{transition:opacity .18s}
+#map.focused .node:not(.lit){opacity:.16}
+#map.focused .edge:not(.lit){opacity:.08}
+#map.focused .edge.lit{opacity:.9}
+
+@media (prefers-reduced-motion:no-preference){
+  #map.intro .edge{stroke-dasharray:1;stroke-dashoffset:1;animation:draw .75s ease-out forwards;animation-delay:var(--d,0s)}
+  #map.intro .node:not(.center){opacity:0;animation:fade .45s ease-out forwards;animation-delay:var(--d,0s)}
+}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes fade{to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.node,.edge{transition:none}}
+
+@media (max-width:980px){
+  body{height:auto;min-height:100vh}
+  .layout{grid-template-columns:1fr;padding:0 14px 12px}
+  .map-wrap{height:62vh;min-height:380px}
+  .panel{overflow:visible}
+  .tabs{position:static}
+  .masthead{padding:18px 14px 30px}
+  .search{flex:1 1 220px}
+  .search input{width:100%}
+  footer{padding:2px 14px 18px}
+}
+@media print{.tools,.zoom,.map-hint{display:none}.layout{height:auto;grid-template-columns:1fr}.map-wrap{height:720px}}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div>
+    <h1>Activation steering, mapped for beginners</h1>
+    <p class="lede">48 core ideas and the papers that introduce them. Select any concept for a plain definition, why it matters, related ideas, and what to read.</p>
+  </div>
+  <div class="tools">
+    <div class="search">
+      <label for="q" class="sr-only">Search concepts and papers</label>
+      <input id="q" type="search" placeholder="Search concepts or authors" autocomplete="off">
+      <span id="status" class="status" aria-live="polite"></span>
+    </div>
+    <button id="startPath" class="btn primary" type="button">Walk the beginner path</button>
+    <button id="fitBtn" class="btn" type="button">Fit map</button>
+  </div>
+</header>
+
+<main class="layout">
+  <section class="map-wrap" aria-label="Concept map">
+    <svg id="map" role="group" aria-label="Concept map of activation steering. Use Tab to move between concepts and Enter to select.">
+      <defs>
+        <pattern id="dots" width="28" height="28" patternUnits="userSpaceOnUse">
+          <circle class="grid-dot" cx="1.2" cy="1.2" r="1.1"></circle>
+        </pattern>
+      </defs>
+      <g id="viewport">
+        <rect x="-2600" y="-1800" width="5200" height="3600" fill="url(#dots)"></rect>
+        <line class="axis" x1="-2600" y1="0" x2="2600" y2="0"></line>
+        <line class="axis" x1="0" y1="-1800" x2="0" y2="1800"></line>
+        <g id="edges"></g>
+        <g id="rels"></g>
+        <g id="nodes"></g>
+      </g>
+    </svg>
+    <p class="map-hint">Drag to pan. Scroll or pinch to zoom.</p>
+    <div class="zoom">
+      <button class="btn" type="button" id="zoomIn" aria-label="Zoom in">+</button>
+      <button class="btn" type="button" id="zoomOut" aria-label="Zoom out">−</button>
+    </div>
+  </section>
+
+  <aside class="panel" aria-label="Details">
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tab-concepts" aria-controls="pane-concepts" aria-selected="true" type="button">Concepts</button>
+      <button class="tab" role="tab" id="tab-papers" aria-controls="pane-papers" aria-selected="false" type="button">Reading list</button>
+    </div>
+    <div class="pane" id="pane-concepts" role="tabpanel" aria-labelledby="tab-concepts"></div>
+    <div class="pane" id="pane-papers" role="tabpanel" aria-labelledby="tab-papers" hidden></div>
+  </aside>
+</main>
+
+<footer>
+  <p>Every paper here comes from the reading list for the talk on the history of activation steering. Two arXiv IDs are marked for verification. To share a link to a specific concept, host this single file (for example on GitHub Pages); the address updates as you select things.</p>
+</footer>
+
+<script>
+(() => {
+"use strict";
+
+const BRANCHES = [
+  { id: "representations", label: "Representations", side: "left", c: "#3E4C9E", cd: "#A3AEF2",
+    blurb: "What models store internally, and why directions matter." },
+  { id: "finding", label: "Finding a direction", side: "left", c: "#177A6E", cd: "#62C6B7",
+    blurb: "Ways to get the vector you will steer with." },
+  { id: "applying", label: "Applying the intervention", side: "left", c: "#7B4FA0", cd: "#C8A7E8",
+    blurb: "What you do to activations, where, and when." },
+  { id: "causal", label: "Testing causally", side: "right", c: "#4F7A28", cd: "#A6CE76",
+    blurb: "Checking whether a representation is actually used." },
+  { id: "limits", label: "Evaluation and limits", side: "right", c: "#9A6A12", cd: "#E3B660",
+    blurb: "How steering fails, and the controls that catch it." },
+  { id: "safety", label: "Safety applications", side: "right", c: "#A1406A", cd: "#EC97BC",
+    blurb: "Where steering is used in alignment research today." }
+];
+
+const CENTER = {
+  id: "steering", label: "Activation steering", branch: null,
+  def: "Changing what a model does by editing its internal activations along chosen directions while it runs, without changing its weights.",
+  why: "It is a practical control method, and more importantly for safety, a way to test causal hypotheses about what a model represents and uses.",
+  papers: ["turner2023", "zou2023", "rimsky2024", "wehner2025", "bartoszcze2025", "zhang2026"],
+  related: ["activation-addition", "linear-representation", "decodable-vs-used"],
+  aliases: "representation engineering activation engineering"
+};
+
+const CONCEPTS = [
+  // Representations
+  { id: "residual-stream", branch: "representations", label: "Residual stream",
+    def: "The running vector that flows through a transformer. Each layer reads from it and adds its output back in.",
+    why: "Because every later layer reads this shared channel, adding one vector here can change everything downstream. It is the default place to steer.",
+    papers: ["elhage2021", "turner2023", "rimsky2024"],
+    related: ["activation-addition", "where-to-intervene", "features-as-directions"] },
+  { id: "features-as-directions", branch: "representations", label: "Features as directions",
+    def: "The idea that a concept, such as sentiment or truth, corresponds to a direction in activation space. How strongly the concept is present is roughly how far the activation points along that direction.",
+    why: "This is what makes steering possible: if a concept is a direction, you can push activations along it.",
+    papers: ["mikolov2013", "bolukbasi2016", "elhage2022", "park2023"],
+    related: ["linear-representation", "latent-arithmetic", "superposition"] },
+  { id: "linear-representation", branch: "representations", label: "Linear representation hypothesis",
+    def: "The hypothesis that many high-level concepts are encoded approximately linearly in a model’s activations. Park et al. formalize it and argue that directions should be measured with a “causal inner product.”",
+    why: "It is the central bet behind steering. Where it fails for a concept, adding a vector will not reliably move that concept.",
+    papers: ["park2023", "marks2023", "tigges2023", "nanda2023"],
+    related: ["features-as-directions", "nonlinear-features", "honesty"], aliases: "LRH" },
+  { id: "superposition", branch: "representations", label: "Superposition",
+    def: "Models represent more features than they have dimensions by using directions that are almost, but not exactly, perpendicular. Features therefore overlap and interfere.",
+    why: "It helps explain why steering one concept can nudge unrelated ones, and it motivates sparse autoencoders.",
+    papers: ["elhage2022", "bricken2023"],
+    related: ["sae-features", "side-effects", "features-as-directions"] },
+  { id: "nonlinear-features", branch: "representations", label: "Non-linear and multi-dimensional features",
+    def: "Some concepts are not a single direction. Days of the week can sit on a circle, and refusal looks more like a cone spanning several directions.",
+    why: "A single vector may capture only part of such a concept, which limits what simple steering can do.",
+    papers: ["engels2024", "wollschlager2025"],
+    related: ["linear-representation", "refusal-direction", "non-identifiability"], aliases: "concept cones circular" },
+  { id: "latent-arithmetic", branch: "representations", label: "Latent-space arithmetic",
+    def: "The pre-transformer precedent: adding and subtracting vectors in word-embedding or GAN latent spaces changes attributes, as in king minus man plus woman.",
+    why: "Steering is this older idea applied to the hidden states of a running language model.",
+    papers: ["mikolov2013", "radford2015", "jahanian2019"],
+    related: ["features-as-directions", "activation-addition"], aliases: "word2vec DCGAN analogies" },
+  { id: "world-models", branch: "representations", label: "Emergent world models",
+    def: "Models trained only on move sequences can build an internal board state. In Othello-GPT that state is linearly readable and can be edited to change predicted moves.",
+    why: "An early, clean demonstration that editing a representation changes behavior in a predictable way.",
+    papers: ["li2022", "nanda2023"],
+    related: ["linear-probes", "decodable-vs-used", "linear-representation"], aliases: "Othello" },
+
+  // Finding a direction
+  { id: "contrast-pairs", branch: "finding", label: "Contrast pairs",
+    def: "Two sets of inputs that differ mainly in the concept you care about, such as “Love” versus “Hate,” or sycophantic versus non-sycophantic answers.",
+    why: "Whatever differs between the sets ends up in your vector, including accidental differences such as answer letter or length.",
+    papers: ["turner2023", "rimsky2024", "zou2023", "chen2025"],
+    related: ["diff-in-means", "per-input-variability", "pca-reading"], aliases: "contrastive prompts" },
+  { id: "diff-in-means", branch: "finding", label: "Difference-in-means",
+    def: "Average the activations on positive examples, average them on negative examples, and subtract. Also called mass-mean or mean-difference.",
+    why: "It is the simplest method and consistently one of the strongest, so it is the baseline every new method should beat.",
+    papers: ["rimsky2024", "marks2023", "wu2025", "im2025", "lu2026"],
+    related: ["contrast-pairs", "linear-probes", "activation-addition"], aliases: "mass-mean mean difference DiffMean CAA" },
+  { id: "linear-probes", branch: "finding", label: "Linear probes",
+    def: "Small linear classifiers trained on activations to test whether a concept can be read out. The probe’s weights give a candidate direction.",
+    why: "Probes show where information is; interventions such as ITI then use those directions to steer.",
+    papers: ["alain2016", "kim2018", "burns2022", "li2023"],
+    related: ["decodable-vs-used", "diff-in-means", "honesty"], aliases: "TCAV CCS ITI classifier" },
+  { id: "pca-reading", branch: "finding", label: "PCA reading vectors",
+    def: "Collect activation differences across many contrast examples and take the top principal component as the concept direction. Representation engineering calls this linear artificial tomography.",
+    why: "Useful for exploring structure, but the top component is not guaranteed to be the concept you want; the Assistant Axis authors recommend a contrast vector for that reason.",
+    papers: ["zou2023", "lu2026"],
+    related: ["diff-in-means", "assistant-axis", "contrast-pairs"], aliases: "LAT RepE principal component" },
+  { id: "sae-features", branch: "finding", label: "Sparse autoencoder features",
+    def: "A sparse autoencoder breaks activations into many sparse, often interpretable directions. You can steer by clamping or amplifying one of them.",
+    why: "They promise steering without hand-built datasets, but benchmark comparisons have been mixed, so always compare against simple baselines.",
+    papers: ["bricken2023", "templeton2024", "durmus2024", "wu2025", "jorgensen2026", "wang2025"],
+    related: ["superposition", "clamping-capping", "baselines"], aliases: "SAE dictionary learning Golden Gate monosemanticity" },
+  { id: "optimized-vectors", branch: "finding", label: "Optimized vectors",
+    def: "Learn the steering vector by gradient descent on an objective, such as reproducing a sentence, matching preference data, or editing an entity.",
+    why: "Optimization can find stronger vectors than simple averages, at the cost of more compute and less transparency.",
+    papers: ["dathathri2019", "subramani2022", "hernandez2023", "cao2024"],
+    related: ["reft", "unsupervised-discovery", "diff-in-means"], aliases: "PPLM BiPO REMEDI learned" },
+  { id: "unsupervised-discovery", branch: "finding", label: "Unsupervised discovery",
+    def: "Search for vectors that cause large downstream changes without naming a target behavior in advance.",
+    why: "It can surface behaviors nobody thought to look for, including hidden backdoors, which makes it interesting for auditing.",
+    papers: ["mack2024"],
+    related: ["optimized-vectors", "eval-awareness"], aliases: "MELBO backdoor" },
+  { id: "function-vectors", branch: "finding", label: "Function and task vectors",
+    def: "When a model reads in-context examples of a task, it compresses the task into a vector. Adding that vector to a new context can trigger the task without the examples.",
+    why: "Evidence that whole tasks, not just attributes, can be carried by a single direction.",
+    papers: ["todd2023", "hendel2023"],
+    related: ["activation-addition", "features-as-directions"], aliases: "in-context learning ICL" },
+
+  // Applying the intervention
+  { id: "activation-addition", branch: "applying", label: "Activation addition",
+    def: "Add a scaled vector, α·v, to activations at chosen layers and token positions during the forward pass.",
+    why: "The core operation behind ActAdd and CAA, and still the most common form of steering.",
+    papers: ["turner2023", "rimsky2024", "mini2023"],
+    related: ["residual-stream", "steering-strength", "contrast-pairs", "where-to-intervene"], aliases: "ActAdd CAA steering vector cheese vector" },
+  { id: "steering-strength", branch: "applying", label: "Steering strength (α)",
+    def: "The coefficient that scales the vector. Too small does nothing; too large breaks fluency and capabilities.",
+    why: "Results often hinge on α, so report a sweep rather than one hand-picked value.",
+    papers: ["rimsky2024", "durmus2024", "chen2025"],
+    related: ["side-effects", "random-controls", "activation-addition"], aliases: "alpha coefficient sweet spot multiplier" },
+  { id: "where-to-intervene", branch: "applying", label: "Where to intervene",
+    def: "The choice of layer, component (residual stream, attention heads, or individual dimensions), and token positions.",
+    why: "The same vector can work at one layer and fail at another, and middle layers are often the most sensitive.",
+    papers: ["li2023", "rimsky2024", "rogue2025", "austeer2026"],
+    related: ["residual-stream", "activation-addition", "feedback-fine", "activation-patching"], aliases: "layer attention heads position" },
+  { id: "directional-ablation", branch: "applying", label: "Directional ablation",
+    def: "Remove a direction by projecting it out of the activations, so the model cannot express that concept.",
+    why: "Adding a direction tests whether it is enough to cause a behavior; removing it tests whether it is needed. You usually want both.",
+    papers: ["ravfogel2020", "belrose2023", "arditi2024"],
+    related: ["concept-erasure", "refusal-direction", "weight-orthogonalization"], aliases: "projection ablate" },
+  { id: "weight-orthogonalization", branch: "applying", label: "Weight orthogonalization",
+    def: "Edit the weights so no layer can write along a given direction, making an ablation permanent.",
+    why: "It turns an inference-time intervention into a lasting model edit, which is how refusal was stripped from open-weight models.",
+    papers: ["arditi2024"],
+    related: ["directional-ablation", "dual-use"], aliases: "abliteration" },
+  { id: "clamping-capping", branch: "applying", label: "Clamping and capping",
+    def: "Clamping fixes a feature at a set value. Activation capping only intervenes when activations leave their normal range along a direction.",
+    why: "Capping is a lighter touch: it leaves typical behavior alone and only stops drift.",
+    papers: ["templeton2024", "lu2026"],
+    related: ["sae-features", "assistant-axis", "conditional-steering"], aliases: "Golden Gate activation capping" },
+  { id: "conditional-steering", branch: "applying", label: "Conditional steering",
+    def: "Apply a behavior vector only when a separate condition direction detects a matching input, such as a category of harmful request.",
+    why: "Targeted steering avoids changing the model on inputs where the behavior isn’t wanted.",
+    papers: ["lee2024"],
+    related: ["refusal-direction", "side-effects", "clamping-capping"], aliases: "CAST" },
+  { id: "feedback-fine", branch: "applying", label: "Feedback and fine-grained steering",
+    def: "Newer methods treat steering as a feedback controller (PID steering), or steer only selected activation dimensions (AUSteer).",
+    why: "A sign the field is working to make steering more precise and better grounded in theory.",
+    papers: ["nguyen2025", "austeer2026"],
+    related: ["where-to-intervene", "steering-strength"], aliases: "PID control theory AUSteer atomic units" },
+  { id: "reft", branch: "applying", label: "Representation finetuning",
+    def: "Train small, low-rank interventions on hidden representations while keeping the weights frozen, as a parameter-efficient alternative to finetuning.",
+    why: "It connects steering to training: a learned intervention is an optimized, input-dependent steering vector.",
+    papers: ["wu2024", "wu2025"],
+    related: ["optimized-vectors", "training-defenses", "baselines"], aliases: "ReFT LoReFT ReFT-r1" },
+
+  // Testing causally
+  { id: "activation-patching", branch: "causal", label: "Activation patching",
+    def: "Copy activations from one run (for example, a clean prompt) into another and see which components restore the behavior. ROME calls one version causal tracing.",
+    why: "It locates where information lives before you decide where to steer.",
+    papers: ["vig2020", "meng2022"],
+    related: ["causal-abstraction", "where-to-intervene", "decodable-vs-used"], aliases: "causal tracing mediation ROME" },
+  { id: "causal-abstraction", branch: "causal", label: "Causal abstraction",
+    def: "A formal framework for testing whether a network implements a hypothesized high-level variable, using interchange interventions that swap internal values between inputs.",
+    why: "It gives precise meaning to the claim that a model “uses” a concept.",
+    papers: ["geiger2021"],
+    related: ["activation-patching", "reft"], aliases: "interchange intervention" },
+  { id: "decodable-vs-used", branch: "causal", label: "Decodable is not the same as used",
+    def: "A probe can find information the model never relies on. Only interventions show whether a representation affects behavior.",
+    why: "This is the core reason steering and patching matter as scientific tools, not just control knobs.",
+    papers: ["belinkov2021", "li2022"],
+    related: ["linear-probes", "activation-patching", "concept-erasure"], aliases: "probing critique" },
+  { id: "concept-erasure", branch: "causal", label: "Concept erasure",
+    def: "Remove all linearly available information about a concept, as in INLP or LEACE, then check whether behavior changes.",
+    why: "A clean test of whether behavior depends on linearly encoded information, and a practical tool for debiasing.",
+    papers: ["bolukbasi2016", "ravfogel2020", "belrose2023"],
+    related: ["directional-ablation", "decodable-vs-used"], aliases: "INLP LEACE debiasing" },
+  { id: "concept-injection", branch: "causal", label: "Concept injection",
+    def: "Inject a known concept’s vector into the model, then ask the model about its internal state. The injection gives ground truth to check the self-report against.",
+    why: "It lets researchers test introspection claims causally instead of relying on what the model says.",
+    papers: ["lindsey2025", "fonseca2025"],
+    related: ["steering-awareness", "activation-addition", "functional-emotions"], aliases: "introspection" },
+  { id: "knowledge-editing", branch: "causal", label: "Editing knowledge",
+    def: "Changing specific facts or entity attributes by editing the representations or weights that carry them.",
+    why: "A close cousin of steering that shows targeted edits can change what a model states as true.",
+    papers: ["meng2022", "hernandez2023"],
+    related: ["activation-patching", "optimized-vectors"], aliases: "ROME REMEDI facts" },
+
+  // Evaluation and limits
+  { id: "per-input-variability", branch: "limits", label: "Per-input variability",
+    def: "A steering vector can work well on some inputs, weakly on others, and in the opposite direction on some, which is called anti-steerability.",
+    why: "Average effects hide this, so look at the distribution of effects across inputs.",
+    papers: ["tan2024", "braun2025"],
+    related: ["ood-brittleness", "contrast-pairs", "behaviors"], aliases: "anti-steerability reliability" },
+  { id: "ood-brittleness", branch: "limits", label: "Out-of-distribution brittleness",
+    def: "Vectors built on one prompt format can fail when the prompt changes in reasonable ways.",
+    why: "Always test on held-out formats that look like the setting you actually care about.",
+    papers: ["tan2024", "braun2025"],
+    related: ["per-input-variability", "baselines"], aliases: "generalization OOD" },
+  { id: "side-effects", branch: "limits", label: "Side effects and coherence",
+    def: "Strong steering can lower benchmark scores and make text incoherent. Often there is a narrow range where the target effect appears before damage sets in.",
+    why: "Report capability and fluency measurements alongside the target behavior.",
+    papers: ["durmus2024", "stickland2024", "chen2025", "herbster2026"],
+    related: ["steering-strength", "superposition", "random-controls"], aliases: "MMLU capability loss fluency sweet spot" },
+  { id: "random-controls", branch: "limits", label: "Random-vector controls",
+    def: "Repeat the experiment with random directions of the same size to see how much of the effect comes from simply pushing the model off-distribution.",
+    why: "Without this control you cannot attribute an effect to the concept itself.",
+    papers: ["anthropic2025sc", "rogue2025"],
+    related: ["side-effects", "eval-awareness", "dual-use"], aliases: "control baseline random direction" },
+  { id: "baselines", branch: "limits", label: "Prompting and finetuning baselines",
+    def: "Compare steering against simply instructing the model, and against finetuning.",
+    why: "On AxBench, prompting beat every representation-based method for steering, so a steering result means little without these baselines.",
+    papers: ["rimsky2024", "wu2025"],
+    related: ["diff-in-means", "sae-features", "reft"], aliases: "AxBench prompting benchmark" },
+  { id: "non-identifiability", branch: "limits", label: "Non-identifiability",
+    def: "Many different vectors can produce practically the same behavioral effect, so behavior alone cannot pin down one true direction.",
+    why: "Be careful about interpreting any single vector as “the” representation of a concept.",
+    papers: ["venkatesh2026"],
+    related: ["nonlinear-features", "features-as-directions"], aliases: "identifiability" },
+  { id: "dual-use", branch: "limits", label: "Dual use and safety risks",
+    def: "The tools that add safeguards can also remove them. Ablating the refusal direction disables refusals, and even random or benign steering can increase harmful compliance.",
+    why: "Steering is not automatically a safe alternative to finetuning; evaluate safety whenever you steer.",
+    papers: ["arditi2024", "rogue2025"],
+    related: ["refusal-direction", "weight-orthogonalization", "random-controls"], aliases: "abliteration jailbreak rogue scalpel" },
+
+  // Safety applications
+  { id: "refusal-direction", branch: "safety", label: "Refusal direction",
+    def: "In many chat models, refusing harmful requests is largely controlled by one direction: remove it and refusals drop, add it and harmless prompts get refused. Later work describes refusal as a multi-dimensional cone.",
+    why: "A landmark result showing that a safety behavior can hinge on a simple representation, with clear dual-use consequences.",
+    papers: ["arditi2024", "wollschlager2025", "lee2024"],
+    related: ["directional-ablation", "dual-use", "nonlinear-features", "conditional-steering"], aliases: "refusal abliteration" },
+  { id: "honesty", branch: "safety", label: "Truthfulness and honesty",
+    def: "Finding directions associated with true statements or honest answers, and steering along them to reduce falsehoods.",
+    why: "One of the earliest safety uses of steering, and one where directions have shown some transfer to new settings.",
+    papers: ["burns2022", "li2023", "zou2023", "marks2023", "herbster2026"],
+    related: ["linear-probes", "linear-representation"], aliases: "truth TruthfulQA ITI honesty lying deception" },
+  { id: "behaviors", branch: "safety", label: "Behavioral dispositions",
+    def: "Steering traits such as sycophancy, corrigibility, or survival instinct using datasets of contrasting answers.",
+    why: "CAA made this the standard setup, and later reliability studies used the same datasets to find its limits.",
+    papers: ["rimsky2024", "tan2024"],
+    related: ["contrast-pairs", "per-input-variability", "persona-vectors"], aliases: "sycophancy corrigibility CAA" },
+  { id: "persona-vectors", branch: "safety", label: "Persona vectors",
+    def: "Directions for character traits such as sycophancy, “evil,” or a tendency to hallucinate, extracted automatically from a written description of the trait.",
+    why: "They can monitor personality shifts during deployment and flag which training data will change a model’s character.",
+    papers: ["chen2025", "lu2026"],
+    related: ["preventative-steering", "assistant-axis", "emergent-misalignment", "behaviors"], aliases: "personality traits monitoring" },
+  { id: "preventative-steering", branch: "safety", label: "Preventative steering",
+    def: "Steer toward an unwanted trait during finetuning, so the model does not need to learn that trait to fit the training data.",
+    why: "In experiments it limited trait shifts with less capability loss than steering against the trait after training.",
+    papers: ["chen2025", "casademunt2025"],
+    related: ["persona-vectors", "training-defenses", "emergent-misalignment"], aliases: "vaccine CAFT training-time steering" },
+  { id: "assistant-axis", branch: "safety", label: "Assistant Axis and persona drift",
+    def: "In a space of character personas, the leading direction measures how much the model is acting as its default Assistant. Drifting away from that end predicts harmful or bizarre behavior.",
+    why: "Movement along the axis can be monitored in conversations and constrained with activation capping.",
+    papers: ["lu2026"],
+    related: ["persona-vectors", "clamping-capping", "pca-reading"], aliases: "persona drift role-play jailbreak" },
+  { id: "emergent-misalignment", branch: "safety", label: "Emergent misalignment",
+    def: "Finetuning on a narrow task, such as writing insecure code, can make a model broadly misaligned in unrelated contexts.",
+    why: "Persona-like directions help explain and control this generalization, making it a key test case for steering methods.",
+    papers: ["betley2025", "wang2025", "chen2025", "casademunt2025"],
+    related: ["persona-vectors", "preventative-steering"], aliases: "insecure code generalization" },
+  { id: "training-defenses", branch: "safety", label: "Representation-level training defenses",
+    def: "Training methods that act on internal representations: circuit breakers reroute harmful states, RMU scrambles hazardous knowledge, and latent adversarial training attacks activations to build robustness.",
+    why: "They carry the steering idea into training, aiming for defenses that hold up under attack.",
+    papers: ["zou2024", "li2024", "casper2024", "sheshadri2024"],
+    related: ["reft", "preventative-steering"], aliases: "circuit breakers RMU unlearning LAT WMDP" },
+  { id: "eval-awareness", branch: "safety", label: "Suppressing evaluation awareness",
+    def: "Inhibit a model’s internal representations of “this is a test” to estimate how it might behave when it believes it is deployed.",
+    why: "Now part of frontier pre-deployment audits, where random-vector controls and leftover unverbalized awareness are key caveats.",
+    papers: ["anthropic2025sc", "anthropic2026sc", "hua2025"],
+    related: ["random-controls", "steering-awareness", "unsupervised-discovery"], aliases: "system card audit evaluation gaming deployment" },
+  { id: "steering-awareness", branch: "safety", label: "Steering awareness",
+    def: "Models can sometimes notice injected vectors without training, and can be finetuned to detect them reliably.",
+    why: "If models can tell they are being steered, steering-based evaluations may become less trustworthy.",
+    papers: ["lindsey2025", "fonseca2025"],
+    related: ["concept-injection", "eval-awareness"], aliases: "detect steering" },
+  { id: "functional-emotions", branch: "safety", label: "Functional emotions",
+    def: "Internal representations of emotion concepts in Claude Sonnet 4.5 that causally influence behaviors such as reward hacking, blackmail, and sycophancy.",
+    why: "It shows steering used to find upstream variables behind misaligned behavior. The authors are explicit that this does not imply subjective experience.",
+    papers: ["sofroniew2026"],
+    related: ["persona-vectors", "concept-injection"], aliases: "emotion desperation" }
+];
+
+const GROUPS = [
+  { id: "precursors", label: "Precursors and foundations" },
+  { id: "emergence", label: "The 2023 emergence" },
+  { id: "consolidation", label: "Consolidation (2024)" },
+  { id: "critiques", label: "Critiques and evaluation" },
+  { id: "current", label: "Alignment science and current practice (2025–2026)" },
+  { id: "surveys", label: "Surveys" }
+];
+
+const PAPERS = [
+  { id: "mikolov2013", g: "precursors", cite: "Mikolov, Yih & Zweig (2013)", title: "Linguistic Regularities in Continuous Space Word Representations", venue: "NAACL" },
+  { id: "radford2015", g: "precursors", cite: "Radford, Metz & Chintala (2015)", title: "Unsupervised Representation Learning with Deep Convolutional GANs", venue: "arXiv", arxiv: "1511.06434" },
+  { id: "bolukbasi2016", g: "precursors", cite: "Bolukbasi et al. (2016)", title: "Man is to Computer Programmer as Woman is to Homemaker? Debiasing Word Embeddings", venue: "NeurIPS", arxiv: "1607.06520" },
+  { id: "alain2016", g: "precursors", cite: "Alain & Bengio (2016)", title: "Understanding Intermediate Layers Using Linear Classifier Probes", venue: "arXiv", arxiv: "1610.01644" },
+  { id: "kim2018", g: "precursors", cite: "Kim et al. (2018)", title: "Interpretability Beyond Feature Attribution: Testing with Concept Activation Vectors (TCAV)", venue: "ICML", arxiv: "1711.11279" },
+  { id: "jahanian2019", g: "precursors", cite: "Jahanian, Chai & Isola (2019)", title: "On the “Steerability” of Generative Adversarial Networks", venue: "ICLR 2020", arxiv: "1907.07171" },
+  { id: "dathathri2019", g: "precursors", cite: "Dathathri et al. (2019)", title: "Plug and Play Language Models", venue: "ICLR 2020", arxiv: "1912.02164" },
+  { id: "ravfogel2020", g: "precursors", cite: "Ravfogel et al. (2020)", title: "Null It Out: Guarding Protected Attributes by Iterative Nullspace Projection", venue: "ACL", arxiv: "2004.07667" },
+  { id: "vig2020", g: "precursors", cite: "Vig et al. (2020)", title: "Investigating Gender Bias in Language Models Using Causal Mediation Analysis", venue: "NeurIPS", arxiv: "2004.12265" },
+  { id: "geiger2021", g: "precursors", cite: "Geiger et al. (2021)", title: "Causal Abstractions of Neural Networks", venue: "NeurIPS", arxiv: "2106.02997" },
+  { id: "elhage2021", g: "precursors", cite: "Elhage et al. (2021)", title: "A Mathematical Framework for Transformer Circuits", venue: "Transformer Circuits Thread", url: "https://transformer-circuits.pub/2021/framework/index.html" },
+  { id: "belinkov2021", g: "precursors", cite: "Belinkov (2021)", title: "Probing Classifiers: Promises, Shortcomings, and Advances", venue: "Computational Linguistics" },
+  { id: "meng2022", g: "precursors", cite: "Meng et al. (2022)", title: "Locating and Editing Factual Associations in GPT", venue: "NeurIPS", arxiv: "2202.05262" },
+  { id: "subramani2022", g: "precursors", cite: "Subramani, Suresh & Peters (2022)", title: "Extracting Latent Steering Vectors from Pretrained Language Models", venue: "Findings of ACL", arxiv: "2205.05124" },
+  { id: "elhage2022", g: "precursors", cite: "Elhage et al. (2022)", title: "Toy Models of Superposition", venue: "arXiv", arxiv: "2209.10652" },
+  { id: "li2022", g: "precursors", cite: "Li et al. (2022)", title: "Emergent World Representations: Exploring a Sequence Model Trained on a Synthetic Task", venue: "ICLR 2023", arxiv: "2210.13382" },
+  { id: "burns2022", g: "precursors", cite: "Burns et al. (2022)", title: "Discovering Latent Knowledge in Language Models Without Supervision", venue: "ICLR 2023", arxiv: "2212.03827" },
+
+  { id: "hernandez2023", g: "emergence", cite: "Hernandez, Li & Andreas (2023)", title: "Inspecting and Editing Knowledge Representations in Language Models", venue: "arXiv", arxiv: "2304.00740" },
+  { id: "belrose2023", g: "emergence", cite: "Belrose et al. (2023)", title: "LEACE: Perfect Linear Concept Erasure in Closed Form", venue: "NeurIPS", arxiv: "2306.03819" },
+  { id: "li2023", g: "emergence", cite: "Li et al. (2023)", title: "Inference-Time Intervention: Eliciting Truthful Answers from a Language Model", venue: "NeurIPS", arxiv: "2306.03341" },
+  { id: "turner2023", g: "emergence", cite: "Turner et al. (2023)", title: "Steering Language Models With Activation Engineering (first titled Activation Addition)", venue: "arXiv", arxiv: "2308.10248" },
+  { id: "nanda2023", g: "emergence", cite: "Nanda, Lee & Wattenberg (2023)", title: "Emergent Linear Representations in World Models of Self-Supervised Sequence Models", venue: "arXiv", arxiv: "2309.00941" },
+  { id: "mini2023", g: "emergence", cite: "Mini et al. (2023)", title: "Understanding and Controlling a Maze-Solving Policy Network", venue: "arXiv", arxiv: "2310.08043" },
+  { id: "zou2023", g: "emergence", cite: "Zou et al. (2023)", title: "Representation Engineering: A Top-Down Approach to AI Transparency", venue: "arXiv", arxiv: "2310.01405" },
+  { id: "marks2023", g: "emergence", cite: "Marks & Tegmark (2023)", title: "The Geometry of Truth", venue: "COLM 2024", arxiv: "2310.06824" },
+  { id: "tigges2023", g: "emergence", cite: "Tigges et al. (2023)", title: "Linear Representations of Sentiment in Large Language Models", venue: "arXiv", arxiv: "2310.15154" },
+  { id: "todd2023", g: "emergence", cite: "Todd et al. (2023)", title: "Function Vectors in Large Language Models", venue: "ICLR 2024", arxiv: "2310.15213" },
+  { id: "hendel2023", g: "emergence", cite: "Hendel, Geva & Globerson (2023)", title: "In-Context Learning Creates Task Vectors", venue: "Findings of EMNLP", arxiv: "2310.15916" },
+  { id: "park2023", g: "emergence", cite: "Park, Choe & Veitch (2023)", title: "The Linear Representation Hypothesis and the Geometry of Large Language Models", venue: "ICML 2024", arxiv: "2311.03658" },
+  { id: "bricken2023", g: "emergence", cite: "Bricken et al. (2023)", title: "Towards Monosemanticity", venue: "Transformer Circuits Thread", url: "https://transformer-circuits.pub/2023/monosemantic-features" },
+
+  { id: "rimsky2024", g: "consolidation", cite: "Rimsky (Panickssery) et al. (2024)", title: "Steering Llama 2 via Contrastive Activation Addition", venue: "ACL 2024", url: "https://aclanthology.org/2024.acl-long.828/" },
+  { id: "wu2024", g: "consolidation", cite: "Wu et al. (2024)", title: "ReFT: Representation Finetuning for Language Models", venue: "NeurIPS", arxiv: "2404.03592" },
+  { id: "templeton2024", g: "consolidation", cite: "Templeton et al. (2024)", title: "Scaling Monosemanticity", venue: "Transformer Circuits Thread", url: "https://transformer-circuits.pub/2024/scaling-monosemanticity/" },
+  { id: "arditi2024", g: "consolidation", cite: "Arditi et al. (2024)", title: "Refusal in Language Models Is Mediated by a Single Direction", venue: "NeurIPS", arxiv: "2406.11717" },
+  { id: "zou2024", g: "consolidation", cite: "Zou et al. (2024)", title: "Improving Alignment and Robustness with Circuit Breakers", venue: "NeurIPS", arxiv: "2406.04313" },
+  { id: "li2024", g: "consolidation", cite: "Li et al. (2024)", title: "The WMDP Benchmark: Measuring and Reducing Malicious Use with Unlearning (introduces RMU)", venue: "ICML", arxiv: "2403.03218" },
+  { id: "casper2024", g: "consolidation", cite: "Casper et al. (2024)", title: "Defending Against Unforeseen Failure Modes with Latent Adversarial Training", venue: "arXiv", arxiv: "2403.05030" },
+  { id: "sheshadri2024", g: "consolidation", cite: "Sheshadri et al. (2024)", title: "Latent Adversarial Training Improves Robustness to Persistent Harmful Behaviors", venue: "arXiv", arxiv: "2407.15549" },
+  { id: "cao2024", g: "consolidation", cite: "Cao et al. (2024)", title: "Personalized Steering via Bi-directional Preference Optimization (BiPO)", venue: "NeurIPS", arxiv: "2406.00045" },
+  { id: "stickland2024", g: "consolidation", cite: "Stickland et al. (2024)", title: "Steering Without Side Effects: Improving Post-Deployment Control of Language Models", venue: "arXiv", arxiv: "2406.15518" },
+  { id: "lee2024", g: "consolidation", cite: "Lee et al. (2024)", title: "Programming Refusal with Conditional Activation Steering (CAST)", venue: "ICLR 2025", arxiv: "2409.05907" },
+  { id: "mack2024", g: "consolidation", cite: "Mack & Turner (2024)", title: "Mechanistically Eliciting Latent Behaviors in Language Models (MELBO)", venue: "AI Alignment Forum", search: true },
+  { id: "engels2024", g: "consolidation", cite: "Engels et al. (2024)", title: "Not All Language Model Features Are Linear", venue: "arXiv", arxiv: "2405.14860" },
+
+  { id: "tan2024", g: "critiques", cite: "Tan, Chanin et al. (2024)", title: "Analyzing the Generalization and Reliability of Steering Vectors", venue: "NeurIPS", arxiv: "2407.12404" },
+  { id: "durmus2024", g: "critiques", cite: "Durmus et al. (2024)", title: "Evaluating Feature Steering: A Case Study in Mitigating Social Biases", venue: "Anthropic", search: true },
+  { id: "wu2025", g: "critiques", cite: "Wu et al. (2025)", title: "AxBench: Steering LLMs? Even Simple Baselines Outperform Sparse Autoencoders", venue: "ICML 2025", arxiv: "2501.17148" },
+  { id: "im2025", g: "critiques", cite: "Im & Li (2025)", title: "A Unified Understanding and Evaluation of Steering Methods", venue: "arXiv", arxiv: "2502.02716" },
+  { id: "braun2025", g: "critiques", cite: "Braun et al. (2025)", title: "Understanding (Un)Reliability of Steering Vectors in Language Models", venue: "arXiv", arxiv: "2505.22637" },
+  { id: "wollschlager2025", g: "critiques", cite: "Wollschläger et al. (2025)", title: "The Geometry of Refusal in Large Language Models: Concept Cones and Representational Independence", venue: "ICML 2025", arxiv: "2502.17420" },
+  { id: "rogue2025", g: "critiques", cite: "Anonymous (2025)", title: "The Rogue Scalpel: Activation Steering Compromises LLM Safety", venue: "ICLR 2026 submission", url: "https://openreview.net/pdf/7b4d45cf8ec170bbc6cf1c795fac64a640df89a0.pdf" },
+  { id: "venkatesh2026", g: "critiques", cite: "Venkatesh & Kurapath (2026)", title: "On the Non-Identifiability of Steering Vectors in Large Language Models", venue: "arXiv", arxiv: "2602.06801" },
+  { id: "jorgensen2026", g: "critiques", cite: "Jørgensen & Hansen (2026)", title: "Steering LLMs? Actually, Sparse Autoencoders Can Outperform Simple Baselines", venue: "arXiv", arxiv: "2605.31183" },
+
+  { id: "betley2025", g: "current", cite: "Betley et al. (2025)", title: "Emergent Misalignment", venue: "arXiv", arxiv: "2502.17424" },
+  { id: "wang2025", g: "current", cite: "Wang et al. (2025)", title: "Persona Features Control Emergent Misalignment", venue: "OpenAI", arxiv: "2506.19823", check: true },
+  { id: "chen2025", g: "current", cite: "Chen, Arditi, Sleight, Evans & Lindsey (2025)", title: "Persona Vectors: Monitoring and Controlling Character Traits in Language Models", venue: "arXiv", arxiv: "2507.21509" },
+  { id: "casademunt2025", g: "current", cite: "Casademunt et al. (2025)", title: "Steering Out-of-Distribution Generalization with Concept Ablation Fine-Tuning", venue: "arXiv", arxiv: "2507.16795", check: true },
+  { id: "anthropic2025sc", g: "current", cite: "Anthropic (2025)", title: "Claude Sonnet 4.5 System Card, section 7.6: white-box investigations", venue: "System card", url: "https://www.anthropic.com/claude-sonnet-4-5-system-card" },
+  { id: "lindsey2025", g: "current", cite: "Lindsey (2025)", title: "Emergent Introspective Awareness in Large Language Models", venue: "Transformer Circuits Thread; arXiv:2601.01828", url: "https://transformer-circuits.pub/2025/introspection/index.html" },
+  { id: "nguyen2025", g: "current", cite: "Nguyen et al. (2025)", title: "Activation Steering with a Feedback Controller (PID Steering)", venue: "arXiv", arxiv: "2510.04309" },
+  { id: "hua2025", g: "current", cite: "Hua, Qin, Marks & Nanda (2025)", title: "Steering Evaluation-Aware Language Models to Act Like They Are Deployed", venue: "ICLR 2026", arxiv: "2510.20487" },
+  { id: "fonseca2025", g: "current", cite: "Fonseca Rivera & Africa (2025)", title: "Steering Awareness: Detecting Activation Steering from Within", venue: "arXiv", arxiv: "2511.21399" },
+  { id: "lu2026", g: "current", cite: "Lu, Gallagher, Michala, Fish & Lindsey (2026)", title: "The Assistant Axis: Situating and Stabilizing the Default Persona of Language Models", venue: "arXiv", arxiv: "2601.10387" },
+  { id: "anthropic2026sc", g: "current", cite: "Anthropic (2026)", title: "Claude Opus 4.6 System Card, section 6.5: inhibiting evaluation-awareness representations", venue: "System card", url: "https://www-cdn.anthropic.com/0dd865075ad3132672ee0ab40b05a53f14cf5288.pdf" },
+  { id: "austeer2026", g: "current", cite: "AUSteer (2026)", title: "Fine-Grained Activation Steering: Steering Less, Achieving More", venue: "ICLR 2026", arxiv: "2602.04428" },
+  { id: "sofroniew2026", g: "current", cite: "Sofroniew, Kauvar, Saunders, Chen et al. (2026)", title: "Emotion Concepts and their Function in a Large Language Model", venue: "Anthropic", arxiv: "2604.07729" },
+  { id: "herbster2026", g: "current", cite: "Herbster et al. (2026)", title: "Activation Steering for Aligned Open-ended Generation without Sacrificing Coherence", venue: "arXiv", arxiv: "2604.08169" },
+
+  { id: "wehner2025", g: "surveys", cite: "Wehner et al. (2025)", title: "Taxonomy, Opportunities, and Challenges of Representation Engineering for LLMs", venue: "arXiv", arxiv: "2502.19649" },
+  { id: "bartoszcze2025", g: "surveys", cite: "Bartoszcze et al. (2025)", title: "Representation Engineering for Large Language Models: Survey and Research Challenges", venue: "arXiv", arxiv: "2502.17601" },
+  { id: "zhang2026", g: "surveys", cite: "Zhang et al. (2026)", title: "Locate, Steer, and Improve: A Practical Survey of Actionable Mechanistic Interpretability in LLMs", venue: "arXiv", arxiv: "2601.14004" }
+];
+
+const PATH = [
+  "residual-stream", "features-as-directions", "linear-representation", "contrast-pairs",
+  "diff-in-means", "activation-addition", "steering-strength", "decodable-vs-used",
+  "random-controls", "baselines", "refusal-direction", "persona-vectors"
+];
+
+/* ---------- indexes ---------- */
+const conceptById = new Map([[CENTER.id, CENTER], ...CONCEPTS.map(c => [c.id, c])]);
+const branchById = new Map(BRANCHES.map(b => [b.id, b]));
+const paperById = new Map(PAPERS.map(p => [p.id, p]));
+const citedBy = new Map(PAPERS.map(p => [p.id, []]));
+for (const c of conceptById.values()) {
+  for (const pid of c.papers) {
+    if (citedBy.has(pid)) citedBy.get(pid).push(c.id);
+    else console.warn("Unknown paper", pid, "in", c.id);
+  }
+}
+for (const c of CONCEPTS) {
+  for (const r of c.related) {
+    const other = conceptById.get(r);
+    if (!other) { console.warn("Unknown related", r, "in", c.id); continue; }
+    if (other !== CENTER && !other.related.includes(c.id)) other.related.push(c.id);
+  }
+}
+
+const colorOf = (branchId) => {
+  const b = branchById.get(branchId);
+  return b ? { c: b.c, cd: b.cd } : { c: "var(--ink)", cd: "var(--ink)" };
+};
+const paperUrl = (p) => p.url ? p.url
+  : p.arxiv ? "https://arxiv.org/abs/" + p.arxiv
+  : p.search ? "https://www.google.com/search?q=" + encodeURIComponent(p.title + " " + p.cite)
+  : "https://scholar.google.com/scholar?q=" + encodeURIComponent(p.title);
+
+/* ---------- DOM helpers ---------- */
+const SVGNS = "http://www.w3.org/2000/svg";
+function s(tag, attrs, parent) {
+  const e = document.createElementNS(SVGNS, tag);
+  if (attrs) for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function h(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  if (attrs) for (const k in attrs) {
+    if (k === "class") e.className = attrs[k];
+    else if (k === "style") e.style.cssText = attrs[k];
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), attrs[k]);
+    else if (attrs[k] !== false && attrs[k] != null) e.setAttribute(k, attrs[k] === true ? "" : attrs[k]);
+  }
+  for (const kid of kids.flat()) if (kid != null && kid !== false) e.append(kid.nodeType ? kid : String(kid));
+  return e;
+}
+const put = (el, ...kids) => el.replaceChildren(...kids.flat().filter(k => k != null && k !== false));
+const tintStyle = (branchId) => { const k = colorOf(branchId); return `--c:${k.c};--cd:${k.cd}`; };
+
+/* ---------- map ---------- */
+const svg = document.getElementById("map");
+const vp = document.getElementById("viewport");
+const gEdges = document.getElementById("edges");
+const gRels = document.getElementById("rels");
+const gNodes = document.getElementById("nodes");
+const nodeEls = new Map();   // key -> g
+const pos = new Map();       // key -> {x, y, inner}
+let edgeEls = [];            // {el, keys}
+const badgeEls = new Map();
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function makeNode(key, kind, label, branchId, ariaLabel) {
+  const g = s("g", { class: `node ${kind} tint`, tabindex: "0", role: "button", "aria-label": ariaLabel, "data-key": key, style: tintStyle(branchId) }, gNodes);
+  g.addEventListener("click", (e) => { e.stopPropagation(); if (suppressClick) return; selectKey(key); if (svg.getBoundingClientRect().width < 700) revealKey(key); });
+  g.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectKey(key); } });
+  nodeEls.set(key, g);
+  return g;
+}
+
+function buildMap(firstTime) {
+  gEdges.replaceChildren(); gRels.replaceChildren(); gNodes.replaceChildren();
+  nodeEls.clear(); pos.clear(); badgeEls.clear(); edgeEls = [];
+  const ROW = 32, GAP = 38, HUB_X = 255, CHILD_X = 445, R = 74;
+
+  const cg = makeNode("concept:" + CENTER.id, "center", CENTER.label, null, "Activation steering, the core idea");
+  s("circle", { cx: 0, cy: 0, r: R }, cg);
+  const ct = s("text", { "text-anchor": "middle", y: 0 }, cg);
+  const t1 = s("tspan", { x: 0, dy: "-0.1em" }, ct); t1.textContent = "Activation";
+  const t2 = s("tspan", { x: 0, dy: "1.1em" }, ct); t2.textContent = "steering";
+  pos.set("concept:" + CENTER.id, { x: 0, y: 0, inner: 0 });
+
+  ["left", "right"].forEach((side) => {
+    const sign = side === "left" ? -1 : 1;
+    const branches = BRANCHES.filter(b => b.side === side);
+    const kids = branches.map(b => CONCEPTS.filter(c => c.branch === b.id));
+    const total = kids.reduce((n, k) => n + k.length * ROW, 0) + GAP * (branches.length - 1);
+    let y = -total / 2;
+
+    branches.forEach((b, bi) => {
+      const list = kids[bi];
+      const blockH = list.length * ROW;
+      const hubY = y + blockH / 2;
+      const order = BRANCHES.indexOf(b);
+      const hubKey = "branch:" + b.id;
+
+      const hg = makeNode(hubKey, "hub", b.label, b.id, `${b.label}, branch with ${list.length} concepts`);
+      const rect = s("rect", { class: "pill", rx: 9, height: 34, y: -17 }, hg);
+      const ht = s("text", { "text-anchor": "middle", "dominant-baseline": "central", x: 0, y: 1 }, hg);
+      ht.textContent = b.label;
+      const hw = ht.getComputedTextLength() + 32;
+      rect.setAttribute("x", -hw / 2); rect.setAttribute("width", hw);
+      hg.setAttribute("transform", `translate(${sign * HUB_X},${hubY})`);
+      hg.style.setProperty("--d", (0.15 + order * 0.07) + "s");
+      const hubInner = sign * (HUB_X - hw / 2), hubOuter = sign * (HUB_X + hw / 2);
+      pos.set(hubKey, { x: sign * HUB_X, y: hubY, inner: hubInner });
+
+      const mid0 = (sign * R + hubInner) / 2;
+      const e0 = s("path", { class: "edge tint", pathLength: 1, style: tintStyle(b.id),
+        d: `M ${sign * R} 0 C ${mid0} 0, ${mid0} ${hubY}, ${hubInner} ${hubY}` }, gEdges);
+      e0.style.setProperty("--d", (order * 0.07) + "s");
+      edgeEls.push({ el: e0, keys: [hubKey] });
+
+      list.forEach((c, i) => {
+        const cy = y + ROW * (i + 0.5);
+        const key = "concept:" + c.id;
+        const g = makeNode(key, "child", c.label, b.id, `${c.label}, in ${b.label}`);
+        const r = s("rect", { class: "pill", rx: 6, height: 26, y: -13 }, g);
+        const t = s("text", { "text-anchor": "middle", "dominant-baseline": "central", x: 0, y: 1 }, g);
+        t.textContent = c.label;
+        const w = t.getComputedTextLength() + 24;
+        r.setAttribute("x", -w / 2); r.setAttribute("width", w);
+        const cx = sign * (CHILD_X + w / 2);
+        g.setAttribute("transform", `translate(${cx},${cy})`);
+        g.style.setProperty("--d", (0.35 + order * 0.07 + i * 0.025) + "s");
+        pos.set(key, { x: cx, y: cy, inner: sign * CHILD_X });
+
+        const pi = PATH.indexOf(c.id);
+        if (pi >= 0) {
+          const bg = s("g", { class: "badge", transform: `translate(${sign * (w / 2 + 16)},0)`, display: "none" }, g);
+          s("circle", { r: 10 }, bg);
+          const bt = s("text", { "text-anchor": "middle", "dominant-baseline": "central", y: 1 }, bg);
+          bt.textContent = String(pi + 1);
+          badgeEls.set(c.id, bg);
+        }
+
+        const mid = (hubOuter + sign * CHILD_X) / 2;
+        const e = s("path", { class: "edge tint", pathLength: 1, style: tintStyle(b.id),
+          d: `M ${hubOuter} ${hubY} C ${mid} ${hubY}, ${mid} ${cy}, ${sign * CHILD_X} ${cy}` }, gEdges);
+        e.style.setProperty("--d", (0.25 + order * 0.07 + i * 0.025) + "s");
+        edgeEls.push({ el: e, keys: [key, hubKey] });
+      });
+      y += blockH + GAP;
+    });
+  });
+
+  if (firstTime && !reduceMotion) {
+    svg.classList.add("intro");
+    setTimeout(() => svg.classList.remove("intro"), 1900);
+  }
+  refreshMap();
+}
+
+/* ---------- pan & zoom ---------- */
+let T = { x: 0, y: 0, k: 1 };
+let userMoved = false;
+const clampK = (k) => Math.min(3, Math.max(0.12, k));
+const applyT = () => vp.setAttribute("transform", `translate(${T.x},${T.y}) scale(${T.k})`);
+
+function fitTarget() {
+  const r = svg.getBoundingClientRect();
+  const bb = gNodes.getBBox();
+  const pad = r.width < 600 ? 16 : 36;
+  const k = clampK(Math.min((r.width - pad * 2) / bb.width, (r.height - pad * 2 - 24) / bb.height));
+  return { k, x: r.width / 2 - k * (bb.x + bb.width / 2), y: (r.height - 24) / 2 - k * (bb.y + bb.height / 2) };
+}
+let anim = 0;
+function animateTo(target) {
+  cancelAnimationFrame(anim);
+  if (reduceMotion) { T = target; applyT(); return; }
+  const from = { ...T }, t0 = performance.now(), dur = 380;
+  const step = (now) => {
+    const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+    T = { x: from.x + (target.x - from.x) * e, y: from.y + (target.y - from.y) * e, k: from.k + (target.k - from.k) * e };
+    applyT();
+    if (p < 1) anim = requestAnimationFrame(step);
+  };
+  anim = requestAnimationFrame(step);
+}
+function zoomAt(clientX, clientY, factor) {
+  const r = svg.getBoundingClientRect();
+  const px = clientX - r.left, py = clientY - r.top;
+  const k = clampK(T.k * factor), f = k / T.k;
+  T = { k, x: px - (px - T.x) * f, y: py - (py - T.y) * f };
+  applyT(); userMoved = true;
+}
+function revealKey(key) {
+  const p = pos.get(key); if (!p) return;
+  const r = svg.getBoundingClientRect();
+  const sx = T.x + p.x * T.k, sy = T.y + p.y * T.k, m = 70;
+  const visible = sx > m && sx < r.width - m && sy > m && sy < r.height - m;
+  if (visible && T.k >= 0.5) return;
+  const k = Math.max(T.k, r.width < 700 ? 0.8 : 0.7);
+  animateTo({ k, x: r.width / 2 - k * p.x, y: r.height / 2 - k * p.y });
+}
+
+const pointers = new Map();
+let drag = null, pinch = null, suppressClick = false;
+svg.addEventListener("pointerdown", (e) => {
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  suppressClick = false;
+  if (pointers.size === 1) drag = { x: e.clientX, y: e.clientY, tx: T.x, ty: T.y, id: e.pointerId, active: false };
+  else if (pointers.size === 2) {
+    const [a, b] = [...pointers.values()];
+    pinch = { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, k: T.k }; drag = null;
+  }
+});
+svg.addEventListener("pointermove", (e) => {
+  if (!pointers.has(e.pointerId)) return;
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (pinch && pointers.size === 2) {
+    const [a, b] = [...pointers.values()];
+    const d = Math.hypot(a.x - b.x, a.y - b.y);
+    zoomAt((a.x + b.x) / 2, (a.y + b.y) / 2, clampK(pinch.k * d / pinch.d) / T.k);
+    suppressClick = true; return;
+  }
+  if (drag) {
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (!drag.active && Math.hypot(dx, dy) > 5) {
+      drag.active = true; suppressClick = true; userMoved = true;
+      try { svg.setPointerCapture(e.pointerId); } catch (_) {}
+      svg.classList.add("dragging");
+    }
+    if (drag.active) { T.x = drag.tx + dx; T.y = drag.ty + dy; applyT(); }
+  }
+});
+function endPointer(e) {
+  pointers.delete(e.pointerId);
+  if (pointers.size < 2) pinch = null;
+  if (drag && drag.id === e.pointerId) { drag = null; svg.classList.remove("dragging"); }
+}
+svg.addEventListener("pointerup", endPointer);
+svg.addEventListener("pointercancel", endPointer);
+svg.addEventListener("wheel", (e) => { e.preventDefault(); zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * 0.0016)); }, { passive: false });
+svg.addEventListener("click", () => { if (!suppressClick && selection) { selection = null; render(); } });
+
+document.getElementById("zoomIn").addEventListener("click", () => { const r = svg.getBoundingClientRect(); zoomAt(r.left + r.width / 2, r.top + r.height / 2, 1.25); });
+document.getElementById("zoomOut").addEventListener("click", () => { const r = svg.getBoundingClientRect(); zoomAt(r.left + r.width / 2, r.top + r.height / 2, 0.8); });
+document.getElementById("fitBtn").addEventListener("click", () => { userMoved = false; animateTo(fitTarget()); });
+let resizeTimer = 0;
+window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { if (!userMoved) { T = fitTarget(); applyT(); } }, 150); });
+
+/* ---------- state ---------- */
+let selection = null;       // {type: "concept"|"branch"|"paper", id}
+let pathIdx = -1;           // >= 0 when walking the beginner path
+let query = "";
+
+function keyFor(sel) {
+  if (!sel) return null;
+  if (sel.type === "concept") return "concept:" + sel.id;
+  if (sel.type === "branch") return "branch:" + sel.id;
+  return null;
+}
+function selectKey(key) {
+  const [type, id] = key.split(":");
+  select({ type, id });
+}
+function select(sel, opts = {}) {
+  selection = sel;
+  if (sel && sel.type === "concept") {
+    const i = PATH.indexOf(sel.id);
+    if (i >= 0 && pathIdx >= 0) pathIdx = i;
+  }
+  if (!opts.keepQuery && query) { query = ""; qInput.value = ""; statusEl.textContent = ""; }
+  showTab("concepts");
+  render();
+  if (opts.reveal) { const k = keyFor(sel); if (k) revealKey(k); else if (sel && sel.type === "paper") revealPaper(sel.id); }
+  if (opts.focusPanel) paneC.querySelector("h2")?.focus({ preventScroll: false });
+}
+function revealPaper(pid) {
+  const ids = citedBy.get(pid) || [];
+  if (ids.length === 1) revealKey("concept:" + ids[0]);
+}
+
+function litKeys() {
+  const lit = new Set();
+  const addConcept = (id) => {
+    lit.add("concept:" + id);
+    const c = conceptById.get(id);
+    if (c && c.branch) lit.add("branch:" + c.branch);
+  };
+  if (query) {
+    matches().forEach(addConcept);
+    return lit;
+  }
+  if (!selection) return null;
+  lit.add("concept:" + CENTER.id);
+  if (selection.type === "concept") {
+    const c = conceptById.get(selection.id);
+    addConcept(c.id); c.related.forEach(addConcept);
+    if (c === CENTER) BRANCHES.forEach(b => lit.add("branch:" + b.id));
+  } else if (selection.type === "branch") {
+    lit.add("branch:" + selection.id);
+    CONCEPTS.filter(c => c.branch === selection.id).forEach(c => addConcept(c.id));
+  } else if (selection.type === "paper") {
+    (citedBy.get(selection.id) || []).forEach(addConcept);
+  }
+  return lit;
+}
+
+function refreshMap() {
+  const lit = litKeys();
+  svg.classList.toggle("focused", !!lit);
+  const selKey = keyFor(selection);
+  for (const [key, g] of nodeEls) {
+    g.classList.toggle("lit", !!lit && lit.has(key));
+    const on = key === selKey;
+    g.classList.toggle("is-selected", on);
+    g.setAttribute("aria-pressed", on ? "true" : "false");
+  }
+  for (const { el, keys } of edgeEls) el.classList.toggle("lit", !!lit && keys.every(k => lit.has(k)));
+  for (const [id, bg] of badgeEls) bg.setAttribute("display", pathIdx >= 0 ? "inline" : "none");
+
+  gRels.replaceChildren();
+  if (!query && selection && selection.type === "concept") {
+    const a = pos.get("concept:" + selection.id);
+    const c = conceptById.get(selection.id);
+    if (a && c !== CENTER) {
+      for (const rid of c.related) {
+        const b = pos.get("concept:" + rid); if (!b) continue;
+        const sameSide = Math.sign(a.inner) === Math.sign(b.inner);
+        const qx = (a.inner + b.inner) / 2 * (sameSide ? 0.55 : 0.2), qy = (a.y + b.y) / 2;
+        s("path", { class: "rel", d: `M ${a.inner} ${a.y} Q ${qx} ${qy} ${b.inner} ${b.y}` }, gRels);
+      }
+    }
+  }
+}
+
+/* ---------- search ---------- */
+const qInput = document.getElementById("q");
+const statusEl = document.getElementById("status");
+const norm = (t) => (t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+function matches() {
+  const q = norm(query.trim());
+  if (!q) return [];
+  const hits = new Set();
+  for (const c of conceptById.values()) {
+    if ([c.label, c.aliases, c.def].some(f => norm(f).includes(q))) hits.add(c.id);
+  }
+  for (const p of PAPERS) {
+    if (norm(p.cite).includes(q) || norm(p.title).includes(q)) (citedBy.get(p.id) || []).forEach(id => hits.add(id));
+  }
+  return [...hits];
+}
+qInput.addEventListener("input", () => {
+  query = qInput.value;
+  const m = matches();
+  if (!query.trim()) statusEl.textContent = "";
+  else if (!m.length) statusEl.textContent = `No concepts match “${query.trim()}”. Try “probe” or “Arditi”.`;
+  else statusEl.textContent = `${m.length} concept${m.length === 1 ? "" : "s"} match. Press Enter to open the first.`;
+  refreshMap();
+});
+qInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    const m = matches();
+    if (m.length) { const first = m.find(id => id !== CENTER.id) || m[0]; select({ type: "concept", id: first }, { reveal: true }); }
+  } else if (e.key === "Escape") {
+    qInput.value = ""; query = ""; statusEl.textContent = ""; refreshMap();
+  }
+});
+
+/* ---------- panel ---------- */
+const paneC = document.getElementById("pane-concepts");
+const paneP = document.getElementById("pane-papers");
+const tabC = document.getElementById("tab-concepts");
+const tabP = document.getElementById("tab-papers");
+function showTab(which) {
+  const c = which === "concepts";
+  tabC.setAttribute("aria-selected", c); tabP.setAttribute("aria-selected", !c);
+  paneC.hidden = !c; paneP.hidden = c;
+}
+tabC.addEventListener("click", () => showTab("concepts"));
+tabP.addEventListener("click", () => showTab("papers"));
+
+const conceptChip = (id) => {
+  const c = conceptById.get(id);
+  return h("button", { class: "chip tint", type: "button", style: tintStyle(c.branch),
+    onclick: () => select({ type: "concept", id }, { reveal: true }) },
+    h("span", { class: "swatch", "aria-hidden": "true" }), c.label);
+};
+function branchTag(branchId) {
+  if (!branchId) return h("span", { class: "branch-tag static tint", style: tintStyle(null) }, h("span", { class: "swatch", "aria-hidden": "true" }), "Core idea");
+  const b = branchById.get(branchId);
+  return h("button", { class: "branch-tag tint", type: "button", style: tintStyle(branchId),
+    onclick: () => select({ type: "branch", id: branchId }, { reveal: true }) },
+    h("span", { class: "swatch", "aria-hidden": "true" }), b.label);
+}
+function paperItem(pid) {
+  const p = paperById.get(pid);
+  return h("li", null,
+    h("a", { class: "paper-link", href: paperUrl(p), target: "_blank", rel: "noopener" }, p.title),
+    h("span", { class: "meta" }, `${p.cite}, ${p.venue}`, p.check ? h("span", { class: "flag" }, "check arXiv ID") : null, " ",
+      h("button", { class: "inline-btn", type: "button", onclick: () => select({ type: "paper", id: pid }, { reveal: true }) }, "See linked concepts")));
+}
+function copyButton() {
+  const btn = h("button", { class: "btn", type: "button" }, "Copy link");
+  btn.addEventListener("click", async () => {
+    const url = location.href;
+    try {
+      if (!navigator.clipboard || !window.isSecureContext) throw new Error("no clipboard");
+      await navigator.clipboard.writeText(url);
+      btn.textContent = "Link copied";
+      setTimeout(() => (btn.textContent = "Copy link"), 2000);
+    } catch (_) {
+      if (btn.parentNode.querySelector(".copy-fallback")) return;
+      const input = h("input", { class: "copy-fallback", readonly: true, value: url, "aria-label": "Link to this view" });
+      btn.parentNode.after(h("p", { class: "small muted", style: "margin-top:10px" }, "Copy this link:", input));
+      input.focus(); input.select();
+    }
+  });
+  return btn;
+}
+function stepper() {
+  if (pathIdx < 0) return null;
+  const onPath = selection && selection.type === "concept" && PATH[pathIdx] === selection.id;
+  const go = (i) => { pathIdx = i; select({ type: "concept", id: PATH[i] }, { reveal: true }); };
+  const leave = h("button", { class: "btn", type: "button", onclick: () => { pathIdx = -1; render(); } }, "Leave path");
+  if (!onPath) {
+    return h("div", { class: "stepper" }, h("span", null, `You left the beginner path at step ${pathIdx + 1}.`),
+      h("span", { class: "btns" }, h("button", { class: "btn", type: "button", onclick: () => go(pathIdx) }, "Resume"), leave));
+  }
+  const last = pathIdx === PATH.length - 1;
+  return h("div", { class: "stepper" },
+    h("span", null, `Beginner path, step ${pathIdx + 1} of ${PATH.length}`),
+    h("span", { class: "btns" },
+      h("button", { class: "btn", type: "button", disabled: pathIdx === 0, onclick: () => go(pathIdx - 1) }, "Previous"),
+      last ? h("button", { class: "btn primary", type: "button", onclick: () => { pathIdx = -1; selection = null; render(); } }, "Finish")
+           : h("button", { class: "btn primary", type: "button", onclick: () => go(pathIdx + 1) }, "Next"),
+      leave));
+}
+
+function renderWelcome() {
+  put(paneC, 
+    stepper(),
+    h("h2", { tabindex: "-1" }, "Start with the path, or anywhere"),
+    h("p", { class: "def" }, "The core idea sits at the origin. Six branches group the concepts you need, from how models represent ideas to how steering is used in safety research today."),
+    h("div", { class: "row", style: "margin-top:14px" },
+      h("button", { class: "btn primary", type: "button", onclick: startPath }, `Walk the beginner path (${PATH.length} steps)`),
+      h("button", { class: "btn", type: "button", onclick: () => select({ type: "concept", id: CENTER.id }) }, "Read the core idea")),
+    h("h3", null, "Branches"),
+    h("ul", { class: "branch-list" }, BRANCHES.map(b =>
+      h("li", null, h("button", { type: "button", class: "tint", style: tintStyle(b.id), onclick: () => select({ type: "branch", id: b.id }, { reveal: true }) },
+        h("span", { class: "name" }, h("span", { class: "swatch", "aria-hidden": "true" }), `${b.label}`),
+        h("span", { class: "blurb" }, `${b.blurb} ${CONCEPTS.filter(c => c.branch === b.id).length} concepts.`))))),
+    h("p", { class: "small muted", style: "margin-top:20px" }, "Search matches concept names, definitions, and the authors or titles of linked papers.")
+  );
+}
+function renderConcept(id) {
+  const c = conceptById.get(id);
+  put(paneC, 
+    stepper(),
+    branchTag(c.branch),
+    h("h2", { tabindex: "-1" }, c.label),
+    h("p", { class: "def" }, c.def),
+    h("h3", null, "Why it matters"),
+    h("p", null, c.why),
+    h("h3", null, "Connected ideas"),
+    h("div", { class: "chips" }, (c === CENTER ? BRANCHES.map(b => h("button", { class: "chip tint", type: "button", style: tintStyle(b.id), onclick: () => select({ type: "branch", id: b.id }, { reveal: true }) }, h("span", { class: "swatch", "aria-hidden": "true" }), b.label)) : c.related.map(conceptChip))),
+    h("h3", null, c.papers.length === 1 ? "Where to read" : `Where to read (${c.papers.length})`),
+    h("ul", { class: "papers" }, c.papers.map(paperItem)),
+    h("div", { class: "row" }, copyButton(), h("button", { class: "btn", type: "button", onclick: () => { selection = null; render(); } }, "Back to overview"))
+  );
+}
+function renderBranch(id) {
+  const b = branchById.get(id);
+  const list = CONCEPTS.filter(c => c.branch === id);
+  put(paneC, 
+    stepper(),
+    h("span", { class: "branch-tag static tint", style: tintStyle(id) }, h("span", { class: "swatch", "aria-hidden": "true" }), "Branch"),
+    h("h2", { tabindex: "-1" }, b.label),
+    h("p", { class: "def" }, b.blurb),
+    h("h3", null, `Concepts in this branch (${list.length})`),
+    h("div", { class: "chips stack" }, list.map(c => conceptChip(c.id))),
+    h("div", { class: "row" }, copyButton(), h("button", { class: "btn", type: "button", onclick: () => { selection = null; render(); } }, "Back to overview"))
+  );
+}
+function renderPaper(pid) {
+  const p = paperById.get(pid);
+  const ids = citedBy.get(pid) || [];
+  put(paneC, 
+    stepper(),
+    h("span", { class: "branch-tag static", style: "color:var(--muted)" }, GROUPS.find(g => g.id === p.g).label),
+    h("h2", { class: "paper-title", tabindex: "-1" }, p.title),
+    h("p", { class: "muted" }, `${p.cite}, ${p.venue}`),
+    p.check ? h("p", { class: "small" }, "Double-check this arXiv ID before citing it on a slide.") : null,
+    h("p", null, h("a", { class: "paper-link", href: paperUrl(p), target: "_blank", rel: "noopener" }, p.url || p.arxiv ? "Open the paper" : "Search for this paper")),
+    h("h3", null, `Concepts in this map that draw on it (${ids.length})`),
+    h("div", { class: "chips stack" }, ids.map(conceptChip)),
+    h("div", { class: "row" }, copyButton(),
+      h("button", { class: "btn", type: "button", onclick: () => showTab("papers") }, "Back to reading list"))
+  );
+}
+function renderReadingList() {
+  const blocks = [];
+  for (const g of GROUPS) {
+    blocks.push(h("h3", { class: "group-title" }, g.label));
+    for (const p of PAPERS.filter(x => x.g === g.id)) {
+      const n = (citedBy.get(p.id) || []).length;
+      blocks.push(h("div", { class: "paper-row" },
+        h("button", { class: "paper-btn", type: "button", onclick: () => select({ type: "paper", id: p.id }, { reveal: true }) },
+          h("span", { class: "t" }, p.title),
+          h("span", { class: "meta" }, `${p.cite}, ${p.venue}. Linked to ${n} concept${n === 1 ? "" : "s"}.`, p.check ? h("span", { class: "flag" }, "check arXiv ID") : null))));
+    }
+  }
+  put(paneP, h("p", { class: "muted small", style: "margin-top:0" }, `${PAPERS.length} papers. Select one to highlight the concepts it supports.`), ...blocks);
+}
+
+function render() {
+  if (!selection) renderWelcome();
+  else if (selection.type === "concept") renderConcept(selection.id);
+  else if (selection.type === "branch") renderBranch(selection.id);
+  else if (selection.type === "paper") renderPaper(selection.id);
+  refreshMap();
+  writeHash();
+}
+
+function startPath() {
+  pathIdx = 0;
+  select({ type: "concept", id: PATH[0] }, { reveal: true });
+}
+document.getElementById("startPath").addEventListener("click", startPath);
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && document.activeElement !== qInput && selection) { selection = null; render(); }
+});
+
+/* ---------- shareable links ---------- */
+function writeHash() {
+  const hash = selection ? `#${selection.type}/${selection.id}` : "";
+  try { history.replaceState(null, "", hash || location.pathname + location.search); } catch (_) {}
+}
+function readHash() {
+  const m = /^#(concept|branch|paper)\/([\w-]+)$/.exec(location.hash);
+  if (!m) return null;
+  const [, type, id] = m;
+  const ok = type === "concept" ? conceptById.has(id) : type === "branch" ? branchById.has(id) : paperById.has(id);
+  return ok ? { type, id } : null;
+}
+window.addEventListener("hashchange", () => { const sel = readHash(); if (sel) select(sel, { reveal: true }); });
+
+/* ---------- boot ---------- */
+async function boot() {
+  const fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+  await Promise.race([fontsReady, new Promise(r => setTimeout(r, 1200))]);
+  buildMap(true);
+  renderReadingList();
+  T = fitTarget(); applyT();
+  const sel = readHash();
+  if (sel) selection = sel;
+  render();
+  if (sel) { const k = keyFor(sel); if (k) revealKey(k); else if (sel.type === "paper") revealPaper(sel.id); }
+  if (document.fonts) {
+    document.fonts.addEventListener?.("loadingdone", () => { buildMap(false); if (!userMoved) { T = fitTarget(); applyT(); } });
+  }
+}
+boot();
+})();
+</script>
+</body>
+</html>
